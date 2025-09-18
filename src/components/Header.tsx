@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MessageSquare, User, LogOut, Settings, BookOpen, Home, BarChart3, Trophy } from "lucide-react";
+import { MessageSquare, MessageCircle, User, LogOut, Settings, BookOpen, Home, BarChart3, Trophy } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Link } from "react-router-dom";
@@ -80,6 +80,22 @@ export const Header = () => {
               </>
             )}
           </nav>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="px-2 md:px-3 text-green-600 hover:text-green-700 hover:bg-green-50"
+            asChild
+          >
+            <a 
+              href="https://wa.me/5511999999999?text=Olá! Gostaria de saber mais sobre o MyEnglishOne" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <MessageCircle className="w-4 h-4 mr-1 md:mr-2" />
+              <span className="text-xs md:text-sm">WhatsApp</span>
+            </a>
+          </Button>
           
           <FeedbackWidget 
             trigger={
