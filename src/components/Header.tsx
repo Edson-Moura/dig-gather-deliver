@@ -88,7 +88,7 @@ export const Header = () => {
             asChild
           >
             <a 
-              href="https://wa.me/5511999999999?text=Olá! Gostaria de saber mais sobre o MyEnglishOne" 
+              href="https://w.app/myenglishone" 
               target="_blank" 
               rel="noopener noreferrer"
             >
