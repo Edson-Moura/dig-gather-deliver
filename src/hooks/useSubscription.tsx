@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { errorHandler, ErrorCategory, handleAsyncError } from '@/lib/error-handler';
+import { logger } from '@/lib/logger';
 
 interface SubscriptionData {
   subscribed: boolean;
@@ -23,138 +25,144 @@ export const useSubscription = () => {
     if (!user || !session) return;
 
     setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('check-subscription', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
+    logger.info('Checking subscription status', { userId: user.id }, 'useSubscription');
+    
+    const result = await handleAsyncError(
+      async () => {
+        const { data, error } = await supabase.functions.invoke('check-subscription', {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
 
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw error;
-      }
+        if (error) {
+          throw error;
+        }
 
-      if (data && typeof data === 'object') {
+        if (!data || typeof data !== 'object') {
+          throw new Error('Invalid response format from subscription service');
+        }
+
         const newSubscriptionData = {
           subscribed: data.subscribed || false,
           subscription_tier: data.subscription_tier || null,
           subscription_end: data.subscription_end || null,
         };
         
-        console.log('Subscription data received:', newSubscriptionData);
+        logger.info('Subscription data retrieved successfully', { 
+          subscribed: newSubscriptionData.subscribed,
+          tier: newSubscriptionData.subscription_tier 
+        }, 'useSubscription', user.id);
+        
         setSubscriptionData(newSubscriptionData);
-      } else {
-        console.error('Invalid response data:', data);
-        throw new Error('Invalid response format');
+        return newSubscriptionData;
+      },
+      {
+        userId: user.id,
+        action: 'checkSubscription',
+        component: 'useSubscription'
       }
-    } catch (error) {
-      console.error('Error checking subscription:', error);
-      
+    );
+
+    if (!result) {
       // Set default values on error to prevent cached stale data
       setSubscriptionData({
         subscribed: false,
         subscription_tier: null,
         subscription_end: null,
       });
-      
-      // Don't show error toast for network issues, auth problems, or edge function connectivity issues
-      const errorMessage = error?.message || '';
-      const shouldShowToast = errorMessage && 
-        !errorMessage.includes('auth') && 
-        !errorMessage.includes('network') &&
-        !errorMessage.includes('Failed to fetch') &&
-        !errorMessage.includes('Failed to send a request to the Edge Function');
-      
-      if (shouldShowToast) {
-        toast({
-          title: "Erro",
-          description: "Erro ao verificar assinatura.",
-          variant: "destructive",
-        });
-      }
-    } finally {
-      setLoading(false);
     }
-  }, [user?.id, session?.access_token, toast]);
+
+    setLoading(false);
+  }, [user?.id, session?.access_token]);
 
   const createCheckout = async (plan: string) => {
     if (!user || !session) {
-      toast({
-        title: "Login necessário",
-        description: "Você precisa estar logado para assinar.",
-        variant: "destructive",
-      });
+      errorHandler.handleError(
+        new Error('User must be authenticated to create checkout'),
+        {
+          userId: user?.id,
+          action: 'createCheckout',
+          component: 'useSubscription',
+          metadata: { plan }
+        }
+      );
       return;
     }
 
     setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { plan },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
+    logger.userAction('Create checkout initiated', user.id, { plan });
+    
+    const result = await handleAsyncError(
+      async () => {
+        const { data, error } = await supabase.functions.invoke('create-checkout', {
+          body: { plan },
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
 
-      // Check if we got a valid response with URL
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw error;
+        if (error) {
+          throw error;
+        }
+
+        if (!data?.url) {
+          throw new Error('No checkout URL returned from payment service');
+        }
+
+        logger.info('Checkout session created successfully', { url: data.url }, 'useSubscription', user.id);
+
+        // Open Stripe checkout in same tab for better mobile compatibility
+        window.location.href = data.url;
+        return data;
+      },
+      {
+        userId: user.id,
+        action: 'createCheckout',
+        component: 'useSubscription',
+        metadata: { plan }
       }
+    );
 
-      if (!data?.url) {
-        console.error('No checkout URL returned:', data);
-        throw new Error('No checkout URL returned');
-      }
-
-      console.log('Checkout session created:', data.url);
-
-      // Open Stripe checkout in same tab for better mobile compatibility
-      window.location.href = data.url;
-    } catch (error) {
-      console.error('Error creating checkout:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao iniciar checkout.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    setLoading(false);
   };
 
   const openCustomerPortal = async () => {
     if (!user || !session) return;
 
     setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('customer-portal', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
+    logger.userAction('Open customer portal', user.id);
+    
+    const result = await handleAsyncError(
+      async () => {
+        const { data, error } = await supabase.functions.invoke('customer-portal', {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      // Open customer portal in a new tab (prevent reverse tabnabbing)
-      const newWindow = window.open('', '_blank', 'noopener,noreferrer');
-      if (newWindow) {
-        newWindow.location.href = data.url;
-      } else {
-        // Fallback if popup is blocked
-        window.location.href = data.url;
+        // Open customer portal in a new tab (prevent reverse tabnabbing)
+        const newWindow = window.open('', '_blank', 'noopener,noreferrer');
+        if (newWindow) {
+          newWindow.location.href = data.url;
+        } else {
+          // Fallback if popup is blocked
+          window.location.href = data.url;
+        }
+        
+        logger.info('Customer portal opened successfully', { url: data.url }, 'useSubscription', user.id);
+        return data;
+      },
+      {
+        userId: user.id,
+        action: 'openCustomerPortal',
+        component: 'useSubscription'
       }
-    } catch (error) {
-      console.error('Error opening customer portal:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao abrir portal do cliente.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    );
+
+    setLoading(false);
   };
 
   useEffect(() => {

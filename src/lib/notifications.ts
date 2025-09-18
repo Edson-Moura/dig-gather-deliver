@@ -1,4 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
+import { errorHandler, ErrorCategory, handleAsyncError } from '@/lib/error-handler';
+import { logger } from '@/lib/logger';
 
 export type NotificationType = 'email' | 'push' | 'both';
 export type NotificationCategory = 
@@ -21,20 +23,36 @@ interface SendNotificationParams {
  * Send a notification to a user via email, push, or both
  */
 export const sendNotification = async (params: SendNotificationParams) => {
-  try {
-    const response = await supabase.functions.invoke('send-notification', {
-      body: params
-    });
+  logger.info('Sending notification', { 
+    userId: params.userId,
+    type: params.type,
+    category: params.category 
+  }, 'notifications');
 
-    if (response.error) {
-      throw new Error(response.error.message);
+  return handleAsyncError(
+    async () => {
+      const response = await supabase.functions.invoke('send-notification', {
+        body: params
+      });
+
+      if (response.error) {
+        throw new Error(`Failed to send notification: ${response.error.message}`);
+      }
+
+      logger.info('Notification sent successfully', { 
+        userId: params.userId,
+        category: params.category 
+      }, 'notifications');
+
+      return response.data;
+    },
+    {
+      userId: params.userId,
+      action: 'sendNotification',
+      component: 'notifications',
+      metadata: { type: params.type, category: params.category }
     }
-
-    return response.data;
-  } catch (error) {
-    console.error('Error sending notification:', error);
-    throw error;
-  }
+  );
 };
 
 /**
@@ -152,64 +170,120 @@ export const checkNotificationPreferences = async (
   userId: string,
   category: NotificationCategory
 ): Promise<{ email: boolean; push: boolean }> => {
-  try {
-    const { data, error } = await supabase
-      .from('notification_preferences')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+  logger.debug('Checking notification preferences', { userId, category }, 'notifications');
 
-    if (error || !data) {
-      // Default preferences if not found
-      return { email: true, push: false };
+  const result = await handleAsyncError(
+    async () => {
+      const { data, error } = await supabase
+        .from('notification_preferences')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        throw error;
+      }
+
+      if (!data) {
+        // Default preferences if not found
+        logger.info('Using default notification preferences', { userId }, 'notifications');
+        return { email: true, push: false };
+      }
+
+      const categoryEnabled = {
+        lesson_reminder: data.lesson_reminders,
+        streak_reminder: data.streak_reminders,
+        achievement: data.achievement_notifications,
+        daily_goal: data.daily_goal_reminders,
+        weekly_summary: data.weekly_summary,
+      }[category] ?? true;
+
+      const preferences = {
+        email: data.email_enabled && categoryEnabled,
+        push: data.push_enabled && categoryEnabled,
+      };
+
+      logger.debug('Notification preferences retrieved', { 
+        userId, 
+        category, 
+        preferences 
+      }, 'notifications');
+
+      return preferences;
+    },
+    {
+      userId,
+      action: 'checkNotificationPreferences',
+      component: 'notifications',
+      metadata: { category }
     }
+  );
 
-    const categoryEnabled = {
-      lesson_reminder: data.lesson_reminders,
-      streak_reminder: data.streak_reminders,
-      achievement: data.achievement_notifications,
-      daily_goal: data.daily_goal_reminders,
-      weekly_summary: data.weekly_summary,
-    }[category] ?? true;
-
-    return {
-      email: data.email_enabled && categoryEnabled,
-      push: data.push_enabled && categoryEnabled,
-    };
-  } catch (error) {
-    console.error('Error checking notification preferences:', error);
-    return { email: true, push: false };
-  }
+  // Return default preferences on error
+  return result || { email: true, push: false };
 };
 
 /**
  * Send notification with preference check
  */
 export const sendNotificationWithPreferences = async (params: SendNotificationParams) => {
-  const preferences = await checkNotificationPreferences(params.userId, params.category);
-  
-  let type: NotificationType = params.type;
-  
-  // Adjust type based on user preferences
-  if (params.type === 'both') {
-    if (preferences.email && preferences.push) {
-      type = 'both';
-    } else if (preferences.email) {
-      type = 'email';
-    } else if (preferences.push) {
-      type = 'push';
-    } else {
-      // User has disabled this category
-      console.log(`User ${params.userId} has disabled ${params.category} notifications`);
-      return null;
-    }
-  } else if (params.type === 'email' && !preferences.email) {
-    console.log(`User ${params.userId} has disabled email notifications for ${params.category}`);
-    return null;
-  } else if (params.type === 'push' && !preferences.push) {
-    console.log(`User ${params.userId} has disabled push notifications for ${params.category}`);
-    return null;
-  }
+  logger.info('Sending notification with preference check', { 
+    userId: params.userId,
+    category: params.category,
+    type: params.type 
+  }, 'notifications');
 
-  return sendNotification({ ...params, type });
+  return handleAsyncError(
+    async () => {
+      const preferences = await checkNotificationPreferences(params.userId, params.category);
+      
+      let type: NotificationType = params.type;
+      
+      // Adjust type based on user preferences
+      if (params.type === 'both') {
+        if (preferences.email && preferences.push) {
+          type = 'both';
+        } else if (preferences.email) {
+          type = 'email';
+        } else if (preferences.push) {
+          type = 'push';
+        } else {
+          // User has disabled this category
+          logger.info(`User has disabled ${params.category} notifications`, { 
+            userId: params.userId,
+            category: params.category 
+          }, 'notifications');
+          return null;
+        }
+      } else if (params.type === 'email' && !preferences.email) {
+        logger.info(`User has disabled email notifications for ${params.category}`, { 
+          userId: params.userId,
+          category: params.category 
+        }, 'notifications');
+        return null;
+      } else if (params.type === 'push' && !preferences.push) {
+        logger.info(`User has disabled push notifications for ${params.category}`, { 
+          userId: params.userId,
+          category: params.category 
+        }, 'notifications');
+        return null;
+      }
+
+      const result = await sendNotification({ ...params, type });
+      
+      logger.info('Notification sent with preferences applied', { 
+        userId: params.userId,
+        category: params.category,
+        finalType: type 
+      }, 'notifications');
+
+      return result;
+    },
+    {
+      userId: params.userId,
+      action: 'sendNotificationWithPreferences',
+      component: 'notifications',
+      metadata: { category: params.category, originalType: params.type }
+    }
+  );
 };
