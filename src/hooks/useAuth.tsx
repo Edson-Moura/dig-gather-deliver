@@ -2,6 +2,8 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { errorHandler, ErrorCategory, handleAsyncError } from '@/lib/error-handler';
+import { logger } from '@/lib/logger';
 
 interface AuthContextType {
   user: User | null;
@@ -117,6 +119,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     setLoading(true);
+    logger.userAction('Sign in initiated', undefined, { email });
+
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -124,18 +128,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error) {
-        let message = "Email ou senha incorretos.";
-        if (error.message.includes("Invalid login credentials")) {
-          message = "Email ou senha incorretos.";
-        } else if (error.message.includes("Email not confirmed")) {
-          message = "Confirme seu email antes de fazer login.";
-        }
-        
-        toast({
-          title: "Erro no login",
-          description: message,
-          variant: "destructive",
+        errorHandler.handleError(error, {
+          action: 'signIn',
+          component: 'useAuth',
+          metadata: { email }
         });
+      } else {
+        logger.userAction('Sign in successful', undefined, { email });
       }
 
       return { error };
@@ -154,79 +153,66 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const resetPassword = async (email: string) => {
-    try {
-      const redirectUrl = `${window.location.origin}/update-password`;
-      
-      console.log('Attempting password reset for:', email);
-      console.log('Redirect URL:', redirectUrl);
-      
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl,
-      });
+    logger.userAction('Password reset initiated', undefined, { email });
 
-      if (error) {
-        console.error('Password reset error:', error);
-        let message = "Erro ao enviar email de recuperação.";
+    const result = await handleAsyncError(
+      async () => {
+        const redirectUrl = `${window.location.origin}/update-password`;
         
-        if (error.message.includes("429") || error.message.includes("rate limit") || error.message.includes("over_email_send_rate_limit")) {
-          message = "Por segurança, você só pode solicitar um novo email após alguns minutos. Tente novamente em breve.";
-        } else if (error.message.includes("Email not found") || error.message.includes("User not found")) {
-          message = "Email não encontrado. Verifique se você digitou corretamente.";
-        } else if (error.message.includes("Invalid email")) {
-          message = "Email inválido. Verifique o formato do email.";
-        }
+        logger.info('Attempting password reset', { email, redirectUrl }, 'useAuth');
         
-        toast({
-          title: "Problema no envio",
-          description: message,
-          variant: "destructive",
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: redirectUrl,
         });
-        
-        return { error };
-      } else {
-        console.log('Password reset email sent successfully');
+
+        if (error) {
+          throw error;
+        }
+
+        logger.userAction('Password reset email sent successfully', undefined, { email });
         toast({
           title: "Email enviado com sucesso!",
           description: "Verifique sua caixa de entrada (e spam) para recuperar sua senha.",
         });
         
         return { error: null };
+      },
+      {
+        action: 'resetPassword',
+        component: 'useAuth',
+        metadata: { email }
       }
-    } catch (err) {
-      console.error('Unexpected error during password reset:', err);
-      toast({
-        title: "Erro inesperado",
-        description: "Algo deu errado. Tente novamente em alguns minutos.",
-        variant: "destructive",
-      });
-      
-      return { error: err };
-    }
+    );
+
+    return result || { error: new Error('Failed to reset password') };
   };
 
   const updatePassword = async (password: string) => {
-    const { error } = await supabase.auth.updateUser({ password });
+    logger.userAction('Password update initiated');
 
-    if (error) {
-      console.error('Password update error:', error);
-      let message = "Erro ao atualizar senha.";
-      if (error.message.includes("Password should be at least 6 characters")) {
-        message = "A senha deve ter pelo menos 6 caracteres.";
+    const result = await handleAsyncError(
+      async () => {
+        const { error } = await supabase.auth.updateUser({ password });
+
+        if (error) {
+          throw error;
+        }
+
+        logger.userAction('Password updated successfully');
+        toast({
+          title: "Senha atualizada!",
+          description: "Sua senha foi alterada com sucesso.",
+        });
+
+        return { error: null };
+      },
+      {
+        action: 'updatePassword',
+        component: 'useAuth'
       }
-      
-      toast({
-        title: "Erro",
-        description: message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Senha atualizada!",
-        description: "Sua senha foi alterada com sucesso.",
-      });
-    }
+    );
 
-    return { error };
+    return result || { error: new Error('Failed to update password') };
   };
 
   const resendConfirmation = async (email: string) => {
