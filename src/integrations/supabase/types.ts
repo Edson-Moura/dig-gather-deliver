@@ -10,648 +10,313 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
-      achievement_templates: {
+      forums: {
         Row: {
-          category: string
-          created_at: string
-          description: string
-          icon: string
-          id: string
-          name: string
-          points_reward: number | null
-          requirement_type: string
-          requirement_value: number
-        }
-        Insert: {
-          category: string
-          created_at?: string
-          description: string
-          icon: string
-          id?: string
-          name: string
-          points_reward?: number | null
-          requirement_type: string
-          requirement_value: number
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          description?: string
-          icon?: string
-          id?: string
-          name?: string
-          points_reward?: number | null
-          requirement_type?: string
-          requirement_value?: number
-        }
-        Relationships: []
-      }
-      achievements: {
-        Row: {
-          achievement_template_id: string
-          created_at: string
-          id: string
-          is_new: boolean
-          unlocked_at: string
-          user_id: string
-        }
-        Insert: {
-          achievement_template_id: string
-          created_at?: string
-          id?: string
-          is_new?: boolean
-          unlocked_at?: string
-          user_id: string
-        }
-        Update: {
-          achievement_template_id?: string
-          created_at?: string
-          id?: string
-          is_new?: boolean
-          unlocked_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_achievement_template"
-            columns: ["achievement_template_id"]
-            isOneToOne: false
-            referencedRelation: "achievement_templates"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_achievements_template_id"
-            columns: ["achievement_template_id"]
-            isOneToOne: false
-            referencedRelation: "achievement_templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      contact_messages: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          message: string
-          name: string
-          status: string
-          subject: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          message: string
-          name: string
-          status?: string
-          subject: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          message?: string
-          name?: string
-          status?: string
-          subject?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      daily_activities: {
-        Row: {
-          activity_date: string
-          created_at: string
-          id: string
-          points_earned: number | null
-          sentences_mastered: number | null
-          sentences_practiced: number | null
-          streak_maintained: boolean | null
-          time_spent_minutes: number | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          activity_date?: string
-          created_at?: string
-          id?: string
-          points_earned?: number | null
-          sentences_mastered?: number | null
-          sentences_practiced?: number | null
-          streak_maintained?: boolean | null
-          time_spent_minutes?: number | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          activity_date?: string
-          created_at?: string
-          id?: string
-          points_earned?: number | null
-          sentences_mastered?: number | null
-          sentences_practiced?: number | null
-          streak_maintained?: boolean | null
-          time_spent_minutes?: number | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      ebook_leads: {
-        Row: {
-          created_at: string
-          downloaded_at: string | null
-          email: string
-          id: string
-          name: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          downloaded_at?: string | null
-          email: string
-          id?: string
-          name?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          downloaded_at?: string | null
-          email?: string
-          id?: string
-          name?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      lesson_progress: {
-        Row: {
-          completed_at: string | null
-          created_at: string | null
-          id: string
-          lesson_id: string
-          status: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string | null
-          id?: string
-          lesson_id: string
-          status?: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string | null
-          id?: string
-          lesson_id?: string
-          status?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_lesson_progress_lesson_id"
-            columns: ["lesson_id"]
-            isOneToOne: false
-            referencedRelation: "lessons"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lesson_sentences: {
-        Row: {
-          created_at: string
-          id: string
-          lesson_id: string
-          order_index: number
-          sentence_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          lesson_id: string
-          order_index: number
-          sentence_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          lesson_id?: string
-          order_index?: number
-          sentence_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_lesson_sentences_lesson_id"
-            columns: ["lesson_id"]
-            isOneToOne: false
-            referencedRelation: "lessons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_lesson_sentences_sentence_id"
-            columns: ["sentence_id"]
-            isOneToOne: false
-            referencedRelation: "sentences"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lesson_sentences_lesson_id_fkey"
-            columns: ["lesson_id"]
-            isOneToOne: false
-            referencedRelation: "lessons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lesson_sentences_sentence_id_fkey"
-            columns: ["sentence_id"]
-            isOneToOne: false
-            referencedRelation: "sentences"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lessons: {
-        Row: {
+          color: string | null
           created_at: string
           description: string | null
           id: string
-          is_active: boolean | null
-          level: string
-          order_index: number
-          title: string
-          updated_at: string
+          name: string
         }
         Insert: {
+          color?: string | null
           created_at?: string
           description?: string | null
           id?: string
-          is_active?: boolean | null
-          level: string
-          order_index: number
-          title: string
-          updated_at?: string
+          name: string
         }
         Update: {
+          color?: string | null
           created_at?: string
           description?: string | null
           id?: string
-          is_active?: boolean | null
-          level?: string
-          order_index?: number
-          title?: string
-          updated_at?: string
+          name?: string
         }
         Relationships: []
       }
-      notification_logs: {
+      group_members: {
         Row: {
-          body: string | null
-          category: string
-          error_message: string | null
+          group_id: string
           id: string
-          metadata: Json | null
-          notification_type: string
-          sent_at: string | null
-          success: boolean | null
-          title: string
+          joined_at: string
+          role: string | null
           user_id: string
         }
         Insert: {
-          body?: string | null
-          category: string
-          error_message?: string | null
+          group_id: string
           id?: string
-          metadata?: Json | null
-          notification_type: string
-          sent_at?: string | null
-          success?: boolean | null
-          title: string
+          joined_at?: string
+          role?: string | null
           user_id: string
         }
         Update: {
-          body?: string | null
-          category?: string
-          error_message?: string | null
+          group_id?: string
           id?: string
-          metadata?: Json | null
-          notification_type?: string
-          sent_at?: string | null
-          success?: boolean | null
-          title?: string
+          joined_at?: string
+          role?: string | null
           user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_private: boolean | null
+          name: string
+          theme: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_private?: boolean | null
+          name: string
+          theme: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_private?: boolean | null
+          name?: string
+          theme?: string
         }
         Relationships: []
       }
-      notification_preferences: {
+      messages: {
         Row: {
-          achievement_notifications: boolean | null
-          created_at: string | null
-          daily_goal_reminders: boolean | null
-          email_enabled: boolean | null
+          content: string
+          created_at: string
           id: string
-          lesson_reminders: boolean | null
-          push_enabled: boolean | null
-          streak_reminders: boolean | null
-          updated_at: string | null
-          user_id: string
-          weekly_summary: boolean | null
+          is_read: boolean | null
+          recipient_id: string
+          sender_id: string
         }
         Insert: {
-          achievement_notifications?: boolean | null
-          created_at?: string | null
-          daily_goal_reminders?: boolean | null
-          email_enabled?: boolean | null
+          content: string
+          created_at?: string
           id?: string
-          lesson_reminders?: boolean | null
-          push_enabled?: boolean | null
-          streak_reminders?: boolean | null
-          updated_at?: string | null
-          user_id: string
-          weekly_summary?: boolean | null
+          is_read?: boolean | null
+          recipient_id: string
+          sender_id: string
         }
         Update: {
-          achievement_notifications?: boolean | null
-          created_at?: string | null
-          daily_goal_reminders?: boolean | null
-          email_enabled?: boolean | null
+          content?: string
+          created_at?: string
           id?: string
-          lesson_reminders?: boolean | null
-          push_enabled?: boolean | null
-          streak_reminders?: boolean | null
-          updated_at?: string | null
+          is_read?: boolean | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          title?: string
+          type?: string
           user_id?: string
-          weekly_summary?: boolean | null
         }
         Relationships: []
       }
       profiles: {
         Row: {
           avatar_url: string | null
+          badges: string[] | null
           bio: string | null
           created_at: string
-          daily_goal: number | null
-          display_name: string | null
+          display_name: string
+          english_level: string | null
           id: string
-          last_activity: string | null
-          level: string | null
           points: number | null
-          streak_count: number | null
-          total_phrases_learned: number | null
           updated_at: string
           user_id: string
+          username: string
         }
         Insert: {
           avatar_url?: string | null
+          badges?: string[] | null
           bio?: string | null
           created_at?: string
-          daily_goal?: number | null
-          display_name?: string | null
+          display_name: string
+          english_level?: string | null
           id?: string
-          last_activity?: string | null
-          level?: string | null
           points?: number | null
-          streak_count?: number | null
-          total_phrases_learned?: number | null
           updated_at?: string
           user_id: string
+          username: string
         }
         Update: {
           avatar_url?: string | null
+          badges?: string[] | null
           bio?: string | null
           created_at?: string
-          daily_goal?: number | null
-          display_name?: string | null
+          display_name?: string
+          english_level?: string | null
           id?: string
-          last_activity?: string | null
-          level?: string | null
           points?: number | null
-          streak_count?: number | null
-          total_phrases_learned?: number | null
           updated_at?: string
           user_id?: string
+          username?: string
         }
         Relationships: []
       }
-      push_subscriptions: {
+      replies: {
         Row: {
-          auth: string
-          created_at: string | null
-          device_name: string | null
-          endpoint: string
-          id: string
-          is_active: boolean | null
-          p256dh: string
-          updated_at: string | null
-          user_agent: string | null
-          user_id: string
-        }
-        Insert: {
-          auth: string
-          created_at?: string | null
-          device_name?: string | null
-          endpoint: string
-          id?: string
-          is_active?: boolean | null
-          p256dh: string
-          updated_at?: string | null
-          user_agent?: string | null
-          user_id: string
-        }
-        Update: {
-          auth?: string
-          created_at?: string | null
-          device_name?: string | null
-          endpoint?: string
-          id?: string
-          is_active?: boolean | null
-          p256dh?: string
-          updated_at?: string | null
-          user_agent?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      sentences: {
-        Row: {
-          audio_url: string | null
-          category: string | null
+          content: string
           created_at: string
-          difficulty_score: number | null
-          english_text: string
           id: string
-          level: string
-          portuguese_text: string
-          updated_at: string
-        }
-        Insert: {
-          audio_url?: string | null
-          category?: string | null
-          created_at?: string
-          difficulty_score?: number | null
-          english_text: string
-          id?: string
-          level: string
-          portuguese_text: string
-          updated_at?: string
-        }
-        Update: {
-          audio_url?: string | null
-          category?: string | null
-          created_at?: string
-          difficulty_score?: number | null
-          english_text?: string
-          id?: string
-          level?: string
-          portuguese_text?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      subscribers: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          stripe_customer_id: string | null
-          subscribed: boolean
-          subscription_end: string | null
-          subscription_tier: string | null
+          topic_id: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          content: string
           created_at?: string
-          email: string
           id?: string
-          stripe_customer_id?: string | null
-          subscribed?: boolean
-          subscription_end?: string | null
-          subscription_tier?: string | null
+          topic_id: string
           updated_at?: string
           user_id: string
         }
         Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          stripe_customer_id?: string | null
-          subscribed?: boolean
-          subscription_end?: string | null
-          subscription_tier?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      user_progress: {
-        Row: {
-          attempts: number | null
-          correct_attempts: number | null
-          created_at: string
-          id: string
-          last_practiced: string | null
-          mastered_at: string | null
-          sentence_id: string
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          attempts?: number | null
-          correct_attempts?: number | null
+          content?: string
           created_at?: string
           id?: string
-          last_practiced?: string | null
-          mastered_at?: string | null
-          sentence_id: string
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          attempts?: number | null
-          correct_attempts?: number | null
-          created_at?: string
-          id?: string
-          last_practiced?: string | null
-          mastered_at?: string | null
-          sentence_id?: string
-          status?: string
+          topic_id?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "fk_user_progress_sentence_id"
-            columns: ["sentence_id"]
+            foreignKeyName: "replies_topic_id_fkey"
+            columns: ["topic_id"]
             isOneToOne: false
-            referencedRelation: "sentences"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_progress_sentence_id_fkey"
-            columns: ["sentence_id"]
-            isOneToOne: false
-            referencedRelation: "sentences"
+            referencedRelation: "topics"
             referencedColumns: ["id"]
           },
         ]
       }
-    }
-    Views: {
-      subscriber_status: {
+      topics: {
         Row: {
-          created_at: string | null
-          subscribed: boolean | null
-          subscription_end: string | null
-          subscription_tier: string | null
-          updated_at: string | null
-          user_id: string | null
+          content: string
+          created_at: string
+          forum_id: string
+          id: string
+          is_pinned: boolean | null
+          last_reply_at: string | null
+          replies_count: number | null
+          title: string
+          updated_at: string
+          user_id: string
         }
         Insert: {
-          created_at?: string | null
-          subscribed?: boolean | null
-          subscription_end?: string | null
-          subscription_tier?: string | null
-          updated_at?: string | null
-          user_id?: string | null
+          content: string
+          created_at?: string
+          forum_id: string
+          id?: string
+          is_pinned?: boolean | null
+          last_reply_at?: string | null
+          replies_count?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
         }
         Update: {
-          created_at?: string | null
-          subscribed?: boolean | null
-          subscription_end?: string | null
-          subscription_tier?: string | null
-          updated_at?: string | null
-          user_id?: string | null
+          content?: string
+          created_at?: string
+          forum_id?: string
+          id?: string
+          is_pinned?: boolean | null
+          last_reply_at?: string | null
+          replies_count?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topics_forum_id_fkey"
+            columns: ["forum_id"]
+            isOneToOne: false
+            referencedRelation: "forums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trades: {
+        Row: {
+          category: string
+          created_at: string
+          creator_id: string
+          description: string
+          id: string
+          status: string | null
+          title: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          creator_id: string
+          description: string
+          id?: string
+          status?: string | null
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          creator_id?: string
+          description?: string
+          id?: string
+          status?: string | null
+          title?: string
         }
         Relationships: []
       }
     }
+    Views: {
+      [_ in never]: never
+    }
     Functions: {
-      initialize_lesson_progress_for_user: {
-        Args: { target_user_id: string }
-        Returns: undefined
-      }
-      log_security_event: {
-        Args: { event_type: string; table_name: string; user_id?: string }
-        Returns: undefined
-      }
-      validate_subscriber_access: {
-        Args: { target_user_id: string }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
