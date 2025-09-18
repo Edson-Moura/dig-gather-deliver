@@ -91,17 +91,18 @@ export const Header = () => {
               href="https://w.app/myenglishone" 
               target="_blank" 
               rel="noopener noreferrer"
+              className="flex items-center gap-1 md:gap-2"
             >
-              <MessageCircle className="w-4 h-4 mr-1 md:mr-2" />
-              <span className="text-xs md:text-sm">WhatsApp</span>
+              <MessageCircle className="w-4 h-4" />
+              <span className="hidden md:inline text-sm">WhatsApp</span>
             </a>
           </Button>
           
           <FeedbackWidget 
             trigger={
               <Button variant="ghost" size="sm" className="px-2 md:px-3">
-                <MessageSquare className="w-4 h-4 mr-1 md:mr-2" />
-                <span className="text-xs md:text-sm">Feedback</span>
+                <MessageSquare className="w-4 h-4" />
+                <span className="hidden md:inline text-sm">Feedback</span>
               </Button>
             }
           />
