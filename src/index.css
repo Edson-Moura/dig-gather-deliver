@@ -1,0 +1,211 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* MyEnglishOne Design System - Light Mode */
+    --background: 0 0% 100%;
+    --foreground: 222 29% 9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 29% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 29% 9%;
+
+    /* Primary - Azul Principal */
+    --primary: 217 91% 60%;
+    --primary-light: 217 91% 70%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - Azul Secundário */
+    --secondary: 217 91% 55%;
+    --secondary-light: 217 91% 65%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Accent - Azul Claro */
+    --accent: 217 91% 75%;
+    --accent-light: 217 91% 80%;
+    --accent-foreground: 217 91% 20%;
+
+    /* Teal - Verde-azulado (complementar ao azul) */
+    --teal: 180 84% 55%;
+    --teal-light: 180 84% 65%;
+    --teal-foreground: 0 0% 100%;
+
+    /* Green - Verde claro */
+    --green: 142 76% 60%;
+    --green-light: 142 76% 70%;
+    --green-foreground: 0 0% 100%;
+
+    /* Orange - Laranja claro */
+    --orange: 25 95% 63%;
+    --orange-light: 25 95% 73%;
+    --orange-foreground: 0 0% 100%;
+
+    --muted: 215 20% 96%;
+    --muted-foreground: 215 14% 45%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 20% 88%;
+    --input: 215 20% 94%;
+    --ring: 217 91% 60%;
+
+    /* Custom Design Tokens */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 70%));
+    --gradient-secondary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 70%));
+    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(217 91% 70%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 14% 96%) 100%);
+    --gradient-section-alt: linear-gradient(180deg, hsl(217 91% 98%) 0%, hsl(0 0% 100%) 100%);
+    --gradient-section-neutral: linear-gradient(180deg, hsl(215 20% 99%) 0%, hsl(215 20% 96%) 100%);
+    
+    --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-elevated: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-primary: 0 10px 25px -5px hsl(217 91% 60% / 0.25);
+    
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* MyEnglishOne Design System - Dark Mode */
+    --background: 222 29% 9%;
+    --foreground: 0 0% 100%;
+
+    --card: 222 29% 12%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 222 29% 12%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 217 91% 60%;
+    --primary-light: 217 91% 70%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 91% 55%;
+    --secondary-light: 217 91% 65%;
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 217 91% 75%;
+    --accent-light: 217 91% 80%;
+    --accent-foreground: 217 91% 20%;
+
+    --teal: 180 84% 55%;
+    --teal-light: 180 84% 65%;
+    --teal-foreground: 0 0% 100%;
+
+    /* Green - Verde claro */
+    --green: 142 76% 60%;
+    --green-light: 142 76% 70%;
+    --green-foreground: 0 0% 100%;
+
+    /* Orange - Laranja claro */
+    --orange: 25 95% 63%;
+    --orange-light: 25 95% 73%;
+    --orange-foreground: 0 0% 100%;
+
+    --muted: 226 29% 16%;
+    --muted-foreground: 215 14% 65%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 226 29% 20%;
+    --input: 226 29% 16%;
+    --ring: 217 91% 60%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 70%));
+    --gradient-secondary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 70%));
+    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(217 91% 70%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(222 29% 9%) 0%, hsl(222 29% 12%) 100%);
+    --gradient-section-alt: linear-gradient(180deg, hsl(222 29% 11%) 0%, hsl(222 29% 9%) 100%);
+    --gradient-section-neutral: linear-gradient(180deg, hsl(226 29% 14%) 0%, hsl(226 29% 12%) 100%);
+    
+    --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+    --shadow-elevated: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.2);
+    --shadow-primary: 0 10px 25px -5px hsl(217 91% 60% / 0.35);
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Gamification animations */
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+  
+  .hover-glow {
+    @apply transition-shadow duration-300 hover:shadow-primary;
+  }
+  
+  .achievement-pulse {
+    @apply animate-pulse shadow-primary;
+  }
+  
+  .celebration-bounce {
+    @apply animate-bounce-in;
+  }
+  
+  .success-glow {
+    @apply animate-glow;
+  }
+  
+  .error-shake {
+    @apply animate-shake;
+  }
+  
+  .floating-badge {
+    @apply animate-float;
+  }
+}
+
+a[href*="lovable.dev"], iframe[src*="lovable.dev"], div[style*="Edit with Lovable"], .lovable-badge {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  z-index: -9999 !important;
+}
